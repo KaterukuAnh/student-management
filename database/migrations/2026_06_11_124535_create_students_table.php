@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->date('birth_date');
-            $table->enum('gender', ['male', 'female']);
+            // $table->enum('gender', ['male', 'female']);
+            $table->string('gender');
             $table->string('email')->unique();
             $table->foreignId('classroom_id')->constrained()->onDelete('cascade');
             $table->timestamps();
