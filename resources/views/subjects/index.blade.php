@@ -1,46 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách môn học</title>
-</head>
-<body>
-    <h2>Danh sách môn học</h2>
+@extends('layouts.app')
 
-    @if(session('success'))
-        <p style="color: green">{{ session('success') }}</p>
-    @endif
+@section('title', 'Danh sách môn học')
 
-    <a href="{{ route('subjects.create') }}">+ Thêm môn học</a> |
-    <a href="{{ route('students.index') }}">Học sinh</a> |
-    <a href="{{ route('classrooms.index') }}">Lớp học</a>
+@section('content')
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Danh sách môn học</h2>
+        <a href="{{ route('subjects.create') }}"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            + Thêm môn học
+        </a>
+    </div>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>ID</th>
-            <th>Tên môn</th>
-            <th>Số tiết</th>
-            <th>Hành động</th>
-        </tr>
-        @foreach($subjects as $subject)
-        <tr>
-            <td>{{ $subject->id }}</td>
-            <td>{{ $subject->name }}</td>
-            <td>{{ $subject->credits }}</td>
-            <td>
-                <a href="{{ route('subjects.edit', $subject->id) }}">Sửa</a>
-                <form action="{{ route('subjects.destroy', $subject->id) }}"
-                      method="POST" style="display:inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            onclick="return confirm('Xóa môn này?')">Xóa</button>
-                </form>
-            </td>
-        </tr>
-        @endforeach
-    </table>
-    
-</body>
-</html>
+    <div class="bg-white rounded shadow overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-600 uppercase text-sm">
+                <tr>
+                    <th class="px-6 py-3">ID</th>
+                    <th class="px-6 py-3">Tên môn</th>
+                    <th class="px-6 py-3">Số tiết</th>
+                    <th class="px-6 py-3">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach($subjects as $subject)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">{{ $subject->id }}</td>
+                    <td class="px-6 py-4 font-medium">{{ $subject->name }}</td>
+                    <td class="px-6 py-4">{{ $subject->credits }}</td>
+                    <td class="px-6 py-4 flex gap-3">
+                        <a href="{{ route('subjects.edit', $subject->id) }}"
+                           class="text-blue-600 hover:underline">Sửa</a>
+                        <form action="{{ route('subjects.destroy', $subject->id) }}"
+                              method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    onclick="return confirm('Xóa môn này?')"
+                                    class="text-red-600 hover:underline">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endsection

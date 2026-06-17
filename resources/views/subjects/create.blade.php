@@ -1,33 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm môn học</title>
-</head>
-<body>
-    <h2>Thêm môn học mới</h2>
+@extends('layouts.app')
 
-    @if($errors->any())
-        <ul style="color:red">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    @endif
+@section('title', 'Thêm môn học')
 
-    <form method="POST" action="{{ route('subjects.store') }}">
-        @csrf
+@section('content')
+    <div class="max-w-lg bg-white rounded shadow p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Thêm môn học mới</h2>
 
-        <label>Tên môn:</label>
-        <input type="text" name="name" value="{{ old('name') }}"><br><br>
+        @if($errors->any())
+            <ul class="bg-red-100 text-red-700 px-4 py-3 rounded mb-4">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        @endif
 
-        <label>Số tiết:</label>
-        <input type="number" name="credits" value="{{ old('credits') }}" min="1"><br><br>
+        <form method="POST" action="{{ route('subjects.store') }}" class="space-y-4">
+            @csrf
 
-        <button type="submit">Lưu</button>
-        <a href="{{ route('subjects.index') }}">Hủy</a>
-    </form>
-    
-</body>
-</html>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tên môn</label>
+                <input type="text" name="name" value="{{ old('name') }}"
+                       class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Số tiết</label>
+                <input type="number" name="credits" value="{{ old('credits') }}" min="1"
+                       class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit"
+                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Lưu</button>
+                <a href="{{ route('subjects.index') }}"
+                   class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">Hủy</a>
+            </div>
+        </form>
+    </div>
+@endsection

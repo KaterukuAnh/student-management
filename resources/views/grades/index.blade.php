@@ -1,51 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách điểm</title>
-</head>
-<body>
-    <h2>Danh sách điểm</h2>
+@extends('layouts.app')
 
-    @if(session('success'))
-        <p style="color: green">{{ session('success') }}</p>
-    @endif
+@section('title', 'Danh sách điểm')
 
-    <a href="{{ route('grades.create') }}">+ Nhập điểm</a> |
-    <a href="{{ route('students.index') }}">Học sinh</a> |
-    <a href="{{ route('subjects.index') }}">Môn học</a> |
-    <a href="{{ route('classrooms.index') }}">Lớp học</a>
+@section('content')
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Danh sách điểm</h2>
+        <a href="{{ route('grades.create') }}"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            + Nhập điểm
+        </a>
+    </div>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>ID</th>
-            <th>Học sinh</th>
-            <th>Môn học</th>
-            <th>Điểm</th>
-            <th>Học kỳ</th>
-            <th>Hành động</th>
-        </tr>
-        @foreach($grades as $grade)
-        <tr>
-            <td>{{ $grade->id }}</td>
-            <td>{{ $grade->student->name }}</td>
-            <td>{{ $grade->subject->name }}</td>
-            <td>{{ $grade->score }}</td>
-            <td>{{ $grade->semester }}</td>
-            <td>
-                <a href="{{ route('grades.edit', $grade->id) }}">Sửa</a>
-                <form action="{{ route('grades.destroy', $grade->id) }}"
-                      method="POST" style="display:inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            onclick="return confirm('Xóa điểm này?')">Xóa</button>
-                </form>
-            </td>
-        </tr>
-        @endforeach
-    </table>
-    
-</body>
-</html>
+    <div class="bg-white rounded shadow overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-600 uppercase text-sm">
+                <tr>
+                    <th class="px-6 py-3">ID</th>
+                    <th class="px-6 py-3">Học sinh</th>
+                    <th class="px-6 py-3">Môn học</th>
+                    <th class="px-6 py-3">Điểm</th>
+                    <th class="px-6 py-3">Học kỳ</th>
+                    <th class="px-6 py-3">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach($grades as $grade)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">{{ $grade->id }}</td>
+                    <td class="px-6 py-4 font-medium">{{ $grade->student->name }}</td>
+                    <td class="px-6 py-4">{{ $grade->subject->name }}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-sm font-semibold
+                            {{ $grade->score >= 8 ? 'bg-green-100 text-green-700' :
+                               ($grade->score >= 5 ? 'bg-yellow-100 text-yellow-700' :
+                               'bg-red-100 text-red-700') }}">
+                            {{ $grade->score }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">{{ $grade->semester }}</td>
+                    <td class="px-6 py-4 flex gap-3">
+                        <a href="{{ route('grades.edit', $grade->id) }}"
+                           class="text-blue-600 hover:underline">Sửa</a>
+                        <form action="{{ route('grades.destroy', $grade->id) }}"
+                              method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    onclick="return confirm('Xóa điểm này?')"
+                                    class="text-red-600 hover:underline">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endsection

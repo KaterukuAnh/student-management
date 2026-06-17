@@ -1,50 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách học sinh</title>
-</head>
-<body>
-    <h2>Danh sách học sinh</h2>
+@extends('layouts.app')
 
-    @if(session('success'))
-        <p style="color: green">{{ session('success') }}</p>
-    @endif
+@section('title', 'Danh sách học sinh')
 
-    <a href="{{ route('students.create') }}">+ Thêm học sinh</a> |
-    <a href="{{ route('classrooms.index') }}">Quản lý lớp</a>
+@section('content')
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Danh sách học sinh</h2>
+        <a href="{{ route('students.create') }}"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            + Thêm học sinh
+        </a>
+    </div>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>ID</th>
-            <th>Tên</th>
-            <th>Ngày sinh</th>
-            <th>Giới tính</th>
-            <th>Email</th>
-            <th>Lớp</th>
-            <th>Thao tác</th>
-        </tr>
-        @foreach($students as $student)
-        <tr>
-            <td>{{ $student->id }}</td>
-            <td>{{ $student->name }}</td>
-            <td>{{ $student->birth_date }}</td>
-            <td>{{ $student->gender == 'male' ? 'Nam' : 'Nữ' }}</td>
-            <td>{{ $student->email }}</td>
-            <td>{{ $student->classroom->name }}</td>
-            <td>
-                <a href="{{ route('students.edit', $student->id) }}">Sửa</a>
-                <form action="{{ route('students.destroy', $student->id) }}"
-                      method="POST" style="display:inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            onclick="return confirm('Xóa học sinh này?')">Xóa</button>
-                </form>
-            </td>
-        </tr>
-        @endforeach
-    </table>
-</body>
-</html>
+    <div class="bg-white rounded shadow overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-600 uppercase text-sm">
+                <tr>
+                    <th class="px-6 py-3">ID</th>
+                    <th class="px-6 py-3">Họ tên</th>
+                    <th class="px-6 py-3">Ngày sinh</th>
+                    <th class="px-6 py-3">Giới tính</th>
+                    <th class="px-6 py-3">Email</th>
+                    <th class="px-6 py-3">Lớp</th>
+                    <th class="px-6 py-3">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach($students as $student)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">{{ $student->id }}</td>
+                    <td class="px-6 py-4 font-medium">{{ $student->name }}</td>
+                    <td class="px-6 py-4">{{ $student->birth_date }}</td>
+                    <td class="px-6 py-4">{{ $student->gender }}</td>
+                    <td class="px-6 py-4">{{ $student->email }}</td>
+                    <td class="px-6 py-4">{{ $student->classroom->name }}</td>
+                    <td class="px-6 py-4 flex gap-3">
+                        <a href="{{ route('students.edit', $student->id) }}"
+                           class="text-blue-600 hover:underline">Sửa</a>
+                        <form action="{{ route('students.destroy', $student->id) }}"
+                              method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    onclick="return confirm('Xóa học sinh này?')"
+                                    class="text-red-600 hover:underline">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endsection
