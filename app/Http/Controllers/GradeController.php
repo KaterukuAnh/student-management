@@ -9,17 +9,13 @@ use App\Models\Subject;
 
 class GradeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $grades = Grade::with(['student', 'subject'])->get();
-        return view('grades.index', compact('grades'));
-    }
-
-    public function create()
-    {
+        $perPage = max(1, min((int) $request->input('per_page', 10), 100));
+        $grades = Grade::with(['student', 'subject'])->paginate($perPage)->withQueryString();
         $students = Student::all();
         $subjects = Subject::all();
-        return view('grades.create', compact('students', 'subjects'));
+        return view('grades.index', compact('grades', 'students', 'subjects'));
     }
 
     public function store(Request $request)
@@ -33,14 +29,7 @@ class GradeController extends Controller
 
         Grade::create($request->all());
         return redirect()->route('grades.index')
-                         ->with('success', 'Nhập điểm thành công!');
-    }
-
-    public function edit(Grade $grade)
-    {
-        $students = Student::all();
-        $subjects = Subject::all();
-        return view('grades.edit', compact('grade', 'students', 'subjects'));
+                         ->with('success', __('Nhập điểm thành công!'));
     }
 
     public function update(Request $request, Grade $grade)
@@ -54,13 +43,13 @@ class GradeController extends Controller
 
         $grade->update($request->all());
         return redirect()->route('grades.index')
-                         ->with('success', 'Cập nhật điểm thành công!');
+                         ->with('success', __('Cập nhật điểm thành công!'));
     }
 
     public function destroy(Grade $grade)
     {
         $grade->delete();
         return redirect()->route('grades.index')
-                         ->with('success', 'Xóa điểm thành công!');
+                         ->with('success', __('Xóa điểm thành công!'));
     }
 }

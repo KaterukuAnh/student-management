@@ -8,16 +8,11 @@ use Illuminate\Http\Request;
 class ClassroomController extends Controller
 {
     // Danh sách lớp
-    public function index()
+    public function index(Request $request)
     {
-        $classrooms = Classroom::all();
+        $perPage = max(1, min((int) $request->input('per_page', 10), 100));
+        $classrooms = Classroom::paginate($perPage)->withQueryString();
         return view('classrooms.index', compact('classrooms'));
-    }
-
-    // Form tạo mới
-    public function create()
-    {
-        return view('classrooms.create');
     }
 
     // Lưu vào DB
@@ -30,13 +25,7 @@ class ClassroomController extends Controller
 
         Classroom::create($request->all());
         return redirect()->route('classrooms.index')
-                         ->with('success', 'Tạo lớp thành công!');
-    }
-
-    // Form sửa
-    public function edit(Classroom $classroom)
-    {
-        return view('classrooms.edit', compact('classroom'));
+                         ->with('success', __('Tạo lớp thành công!'));
     }
 
     // Cập nhật
@@ -49,7 +38,7 @@ class ClassroomController extends Controller
 
         $classroom->update($request->all());
         return redirect()->route('classrooms.index')
-                         ->with('success', 'Cập nhật thành công!');
+                         ->with('success', __('Cập nhật thành công!'));
     }
 
     // Xóa
@@ -57,6 +46,6 @@ class ClassroomController extends Controller
     {
         $classroom->delete();
         return redirect()->route('classrooms.index')
-                         ->with('success', 'Xóa thành công!');
+                         ->with('success', __('Xóa thành công!'));
     }
 }
