@@ -12,6 +12,7 @@
 /.vscode
 /.zed
 /auth.json
+/database/*.sqlite
 /node_modules
 /public/build
 /public/hot
@@ -22,3 +23,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+.claude/
+CLAUDE.md
