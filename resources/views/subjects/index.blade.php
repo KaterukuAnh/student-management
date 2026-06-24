@@ -1,46 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách môn học</title>
-</head>
-<body>
-    <h2>Danh sách môn học</h2>
+@extends('layouts.app')
 
-    @if(session('success'))
-        <p style="color: green">{{ session('success') }}</p>
-    @endif
+@section('title', __('Danh sách môn học'))
 
-    <a href="{{ route('subjects.create') }}">+ Thêm môn học</a> |
-    <a href="{{ route('students.index') }}">Học sinh</a> |
-    <a href="{{ route('classrooms.index') }}">Lớp học</a>
+@php
+    $reopenCreate = $errors->any() && old('_modal') === 'create';
+    $reopenEdit = $errors->any() && old('_modal') === 'edit';
+@endphp
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>ID</th>
-            <th>Tên môn</th>
-            <th>Số tiết</th>
-            <th>Hành động</th>
-        </tr>
-        @foreach($subjects as $subject)
-        <tr>
-            <td>{{ $subject->id }}</td>
-            <td>{{ $subject->name }}</td>
-            <td>{{ $subject->credits }}</td>
-            <td>
-                <a href="{{ route('subjects.edit', $subject->id) }}">Sửa</a>
-                <form action="{{ route('subjects.destroy', $subject->id) }}"
-                      method="POST" style="display:inline">
+@section('content')
+    <div
+        x-data="{ showCreate: {{ $reopenCreate ? 'true' : 'false' }}, editing: null }"
+        x-init="@if ($reopenEdit) editing = @js(['id' => old('id'), 'name' => old('name'), 'credits' => old('credits')]) @endif"
+    >
+        <x-page-head crumb="{{ __('Tổ chức').' · '.__('Môn học') }}" title="{{ __('Danh sách môn học') }}">
+            <x-slot:actions>
+                <button type="button" class="btn btn-primary" @click="showCreate = true"><span class="plus">+</span> {{ __('Thêm môn học') }}</button>
+            </x-slot:actions>
+        </x-page-head>
+
+        <div class="panel">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>{{ __('Tên môn') }}</th>
+                        <th>{{ __('Số tiết') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($subjects as $subject)
+                        <tr>
+                            <td class="id">{{ $subject->id }}</td>
+                            <td class="cell-name"><span class="nm">{{ $subject->name }}</span></td>
+                            <td>{{ $subject->credits }}</td>
+                            <td class="rowact">
+                                <button type="button" class="iconbtn" @click="editing = @js(['id' => $subject->id, 'name' => $subject->name, 'credits' => $subject->credits])">{{ __('Sửa') }}</button>
+                                <form action="{{ route('subjects.destroy', $subject->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" onclick="return confirm('{{ __('Xóa môn này?') }}')" class="iconbtn danger">{{ __('Xóa') }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4"><div class="empty"><div class="big">{{ __('Chưa có môn học nào') }}</div></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            <x-pagination :paginator="$subjects" />
+        </div>
+
+        <div class="overlay" x-show="showCreate" x-cloak @keydown.escape.window="showCreate = false" style="display:none">
+            <div class="modal" @click.away="showCreate = false">
+                <div class="modal-h">
+                    <span class="ti">{{ __('Thêm môn học mới') }}</span>
+                    <button type="button" class="x" @click="showCreate = false">✕</button>
+                </div>
+
+                <form method="POST" action="{{ route('subjects.store') }}">
                     @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            onclick="return confirm('Xóa môn này?')">Xóa</button>
+                    <input type="hidden" name="_modal" value="create">
+
+                    <div class="modal-b">
+                        @if ($reopenCreate)
+                            <div class="login-error">
+                                @foreach ($errors->all() as $error)
+                                    <div>{{ $error }}</div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="form-grid">
+                            <div class="field full">
+                                <label>{{ __('Tên môn') }}</label>
+                                <input type="text" name="name" value="{{ old('name') }}" class="inp">
+                            </div>
+
+                            <div class="field full">
+                                <label>{{ __('Số tiết') }}</label>
+                                <input type="number" name="credits" value="{{ old('credits') }}" min="1" class="inp">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-f">
+                        <button type="button" class="btn btn-ghost" @click="showCreate = false">{{ __('Hủy') }}</button>
+                        <button type="submit" class="btn btn-accent">{{ __('Lưu') }}</button>
+                    </div>
                 </form>
-            </td>
-        </tr>
-        @endforeach
-    </table>
-    
-</body>
-</html>
+            </div>
+        </div>
+
+        <div class="overlay" x-show="editing" x-cloak @keydown.escape.window="editing = null" style="display:none">
+            <div class="modal" @click.away="editing = null" x-show="editing">
+                <div class="modal-h">
+                    <span class="ti">{{ __('Sửa môn học') }}</span>
+                    <button type="button" class="x" @click="editing = null">✕</button>
+                </div>
+
+                <template x-if="editing">
+                    <form method="POST" :action="'{{ route('subjects.index') }}/' + editing.id">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="_modal" value="edit">
+                        <input type="hidden" name="id" :value="editing.id">
+
+                        <div class="modal-b">
+                            @if ($reopenEdit)
+                                <div class="login-error">
+                                    @foreach ($errors->all() as $error)
+                                        <div>{{ $error }}</div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="form-grid">
+                                <div class="field full">
+                                    <label>{{ __('Tên môn') }}</label>
+                                    <input type="text" name="name" x-model="editing.name" class="inp">
+                                </div>
+
+                                <div class="field full">
+                                    <label>{{ __('Số tiết') }}</label>
+                                    <input type="number" name="credits" x-model="editing.credits" min="1" class="inp">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-f">
+                            <button type="button" class="btn btn-ghost" @click="editing = null">{{ __('Hủy') }}</button>
+                            <button type="submit" class="btn btn-accent">{{ __('Cập nhật') }}</button>
+                        </div>
+                    </form>
+                </template>
+            </div>
+        </div>
+    </div>
+@endsection

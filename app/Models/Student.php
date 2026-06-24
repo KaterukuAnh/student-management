@@ -10,6 +10,29 @@ class Student extends Model
         'name', 'birth_date', 'gender', 'email', 'classroom_id'
     ];
 
+    public const GENDERS = [
+        'male' => 'Nam',
+        'female' => 'Nữ',
+        'non_binary' => 'Phi nhị nguyên',
+        'genderfluid' => 'Genderfluid',
+        'agender' => 'Agender',
+        'bigender' => 'Bigender',
+        'demiboy' => 'Demiboy',
+        'demigirl' => 'Demigirl',
+        'trans_male' => 'Chuyển giới nam',
+        'trans_female' => 'Chuyển giới nữ',
+        'genderqueer' => 'Genderqueer',
+        'androgynous' => 'Androgynous',
+        'neutrois' => 'Neutrois',
+        'two_spirit' => 'Two-Spirit',
+        'xenogender' => 'Xenogender',
+        'catgender' => 'Catgender',
+        'stargender' => 'Stargender',
+        'cloudgender' => 'Cloudgender',
+        'voidgender' => 'Voidgender',
+        'other' => 'Khác',
+    ];
+
     // Quan hệ: 1 học sinh thuộc 1 lớp
     public function classroom()
     {
@@ -20,5 +43,10 @@ class Student extends Model
     public function grades()
     {
         return $this->hasMany(Grade::class);
+    }
+
+    public function genderLabel(): string
+    {
+        return __(self::GENDERS[$this->gender] ?? $this->gender);
     }
 }

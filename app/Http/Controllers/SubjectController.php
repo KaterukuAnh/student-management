@@ -7,15 +7,11 @@ use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $subjects = Subject::all();
+        $perPage = max(1, min((int) $request->input('per_page', 10), 100));
+        $subjects = Subject::paginate($perPage)->withQueryString();
         return view('subjects.index', compact('subjects'));
-    }
-
-    public function create()
-    {
-        return view('subjects.create');
     }
 
     public function store(Request $request)
@@ -27,12 +23,7 @@ class SubjectController extends Controller
 
         Subject::create($request->all());
         return redirect()->route('subjects.index')
-                         ->with('success', 'Thêm môn học thành công!');
-    }
-
-    public function edit(Subject $subject)
-    {
-        return view('subjects.edit', compact('subject'));
+                         ->with('success', __('Thêm môn học thành công!'));
     }
 
     public function update(Request $request, Subject $subject)
@@ -44,13 +35,13 @@ class SubjectController extends Controller
 
         $subject->update($request->all());
         return redirect()->route('subjects.index')
-                         ->with('success', 'Cập nhật thành công!');
+                         ->with('success', __('Cập nhật thành công!'));
     }
 
     public function destroy(Subject $subject)
     {
         $subject->delete();
         return redirect()->route('subjects.index')
-                         ->with('success', 'Xóa thành công!');
+                         ->with('success', __('Xóa thành công!'));
     }
 }

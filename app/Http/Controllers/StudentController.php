@@ -8,16 +8,12 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::with('classroom')->get();
-        return view('students.index', compact('students'));
-    }
-
-    public function create()
-    {
+        $perPage = max(1, min((int) $request->input('per_page', 10), 100));
+        $students = Student::with('classroom')->paginate($perPage)->withQueryString();
         $classrooms = Classroom::all();
-        return view('students.create', compact('classrooms'));
+        return view('students.index', compact('students', 'classrooms'));
     }
 
     public function store(Request $request)
@@ -32,13 +28,7 @@ class StudentController extends Controller
 
         Student::create($request->all());
         return redirect()->route('students.index')
-                         ->with('success', 'Thêm học sinh thành công!');
-    }
-
-    public function edit(Student $student)
-    {
-        $classrooms = Classroom::all();
-        return view('students.edit', compact('student', 'classrooms'));
+                         ->with('success', __('Thêm học sinh thành công!'));
     }
 
     public function update(Request $request, Student $student)
@@ -53,13 +43,13 @@ class StudentController extends Controller
 
         $student->update($request->all());
         return redirect()->route('students.index')
-                         ->with('success', 'Cập nhật thành công!');
+                         ->with('success', __('Cập nhật thành công!'));
     }
 
     public function destroy(Student $student)
     {
         $student->delete();
         return redirect()->route('students.index')
-                         ->with('success', 'Xóa thành công!');
+                         ->with('success', __('Xóa thành công!'));
     }
 }
