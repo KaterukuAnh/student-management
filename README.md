@@ -4,11 +4,11 @@ A school student management system built with Laravel, featuring Admin/Teacher r
 
 ## 🛠 Tech Stack
 
-- **Backend:** PHP ^8.2, Laravel ^12.0
+- **Backend:** PHP, Laravel
 - **Database:** MySQL
-- **Frontend:** Blade templates, Tailwind CSS ^4.3.1 (via `@tailwindcss/vite`), Alpine.js ^3.4.2, Chart.js ^4.5.1
-- **Build tool:** Vite ^7.0.7 + `laravel-vite-plugin` ^2.0.0
-- **Code quality:** Laravel Pint ^1.24, PHPUnit ^11.5
+- **Frontend:** Blade templates, Tailwind CSS (via `@tailwindcss/vite`), Alpine.js, Chart.js
+- **Build tool:** Vite + `laravel-vite-plugin`
+- **Code quality:** Laravel Pint, PHPUnit
 
 ## ✨ Features
 
@@ -52,6 +52,27 @@ A school student management system built with Laravel, featuring Admin/Teacher r
 - Vietnamese, English, and Japanese (`vi` / `en` / `ja`)
 - Vietnamese strings are the literal translation keys in the code; `lang/en.json` and `lang/ja.json` provide the English/Japanese overrides
 - Language switch via `/lang/{locale}`, persisted in session, applied on every request by the `SetLocale` middleware
+
+## 🧭 Route Summary
+
+| Method | Route | Description | Access |
+|--------|-------|--------------|--------|
+| GET | `/` | Redirects to the dashboard | Both |
+| GET | `/dashboard` | Dashboard (admin stats / teacher overview) | Both |
+| GET, POST | `/login`, `/logout`, `/forgot-password`, `/reset-password` | Authentication (Breeze) | Both |
+| GET, PATCH, DELETE | `/profile` | View/update/delete own profile | Both |
+| GET, POST, PUT, DELETE | `/grades`, `/grades/{grade}` | Grade list CRUD | Both |
+| GET, POST | `/grades/entry` | Class-wide grade entry sheet | Both |
+| GET | `/schedule` | View own weekly teaching schedule | Teacher |
+| GET, POST | `/comments` | View/write student comments | Teacher |
+| GET, POST, PUT, DELETE | `/classrooms`, `/classrooms/{classroom}` | Classroom CRUD | Admin |
+| GET, POST, PUT, DELETE | `/students`, `/students/{student}` | Student CRUD | Admin |
+| GET, POST, PUT, DELETE | `/subjects`, `/subjects/{subject}` | Subject CRUD | Admin |
+| GET, POST, PUT, DELETE | `/users`, `/users/{user}` | User account management | Admin |
+| GET, POST, PUT, DELETE | `/admin/schedule`, `/admin/schedule/{lesson}` | School-wide lesson scheduling | Admin |
+| GET | `/lang/{locale}` | Switch UI language (vi/en/ja) | Both |
+
+> `/grades` and `/grades/entry` carry no `role:` middleware — both Admin and Teacher can list/edit grades and use the class-wide entry sheet.
 
 ## 📂 Project Structure
 
@@ -142,6 +163,12 @@ Created by `php artisan db:seed`, all using the password **`password`**:
 
 The seeder also creates 3 classrooms, 5 subjects, 12 students, two semesters of grades, a sample weekly lesson schedule, and a few student comments.
 
+## 🩹 Troubleshooting
+
+- **MySQL connection error / "Access denied for user 'root'"** — Make sure MySQL is started in the XAMPP Control Panel. If it won't start, port 3306 may already be taken by another MySQL installation (e.g. a separately installed MySQL Windows service) — stop that service or update `DB_PORT` in `.env` to match the MySQL instance you're actually running.
+- **`composer install` fails because the `zip` extension is missing** — Open the `php.ini` used by your CLI PHP (run `php --ini` to find it), uncomment/add `extension=zip`, then restart your terminal.
+- **Page loads with no styling (missing CSS) after `php artisan serve`** — This happens when neither the Vite dev server nor a production build is running. Run `npm run build` (or `composer run dev` for active development) to generate the assets in `public/build`.
+
 ## 👤 Author
 
 DANG NGUYEN MINH ANH (KaterukuAnh)
@@ -154,11 +181,11 @@ Hệ thống quản lý học sinh cho trường học, xây dựng bằng Larav
 
 ## 🛠 Công nghệ sử dụng
 
-- **Backend:** PHP ^8.2, Laravel ^12.0
+- **Backend:** PHP, Laravel
 - **Cơ sở dữ liệu:** MySQL
-- **Frontend:** Blade templates, Tailwind CSS ^4.3.1 (qua `@tailwindcss/vite`), Alpine.js ^3.4.2, Chart.js ^4.5.1
-- **Build tool:** Vite ^7.0.7 + `laravel-vite-plugin` ^2.0.0
-- **Chất lượng code:** Laravel Pint ^1.24, PHPUnit ^11.5
+- **Frontend:** Blade templates, Tailwind CSS (qua `@tailwindcss/vite`), Alpine.js, Chart.js
+- **Build tool:** Vite + `laravel-vite-plugin`
+- **Chất lượng code:** Laravel Pint, PHPUnit
 
 ## ✨ Tính năng
 
@@ -202,6 +229,27 @@ Hệ thống quản lý học sinh cho trường học, xây dựng bằng Larav
 - Tiếng Việt, English, 日本語 (`vi` / `en` / `ja`)
 - Chuỗi tiếng Việt là key dịch gốc ngay trong code; `lang/en.json` và `lang/ja.json` cung cấp bản dịch tiếng Anh/Nhật
 - Chuyển ngôn ngữ qua `/lang/{locale}`, lưu vào session, áp dụng ở mỗi request bởi middleware `SetLocale`
+
+## 🧭 Tổng hợp Route chính
+
+| Method | Route | Mô tả | Quyền truy cập |
+|--------|-------|--------------|--------|
+| GET | `/` | Chuyển hướng tới trang dashboard | Cả hai |
+| GET | `/dashboard` | Trang tổng quan (thống kê cho Admin / tổng quan cho Teacher) | Cả hai |
+| GET, POST | `/login`, `/logout`, `/forgot-password`, `/reset-password` | Đăng nhập/đăng xuất, quên/đặt lại mật khẩu | Cả hai |
+| GET, PATCH, DELETE | `/profile` | Xem/sửa/xóa hồ sơ cá nhân | Cả hai |
+| GET, POST, PUT, DELETE | `/grades`, `/grades/{grade}` | CRUD danh sách điểm | Cả hai |
+| GET, POST | `/grades/entry` | Bảng nhập điểm theo lớp | Cả hai |
+| GET | `/schedule` | Xem thời khóa biểu của chính mình | Teacher |
+| GET, POST | `/comments` | Xem/ghi nhận xét học sinh | Teacher |
+| GET, POST, PUT, DELETE | `/classrooms`, `/classrooms/{classroom}` | CRUD lớp học | Admin |
+| GET, POST, PUT, DELETE | `/students`, `/students/{student}` | CRUD học sinh | Admin |
+| GET, POST, PUT, DELETE | `/subjects`, `/subjects/{subject}` | CRUD môn học | Admin |
+| GET, POST, PUT, DELETE | `/users`, `/users/{user}` | Quản lý tài khoản | Admin |
+| GET, POST, PUT, DELETE | `/admin/schedule`, `/admin/schedule/{lesson}` | Xếp thời khóa biểu toàn trường | Admin |
+| GET | `/lang/{locale}` | Chuyển ngôn ngữ giao diện (vi/en/ja) | Cả hai |
+
+> `/grades` và `/grades/entry` không gắn middleware `role:` nào — cả Admin và Teacher đều xem/sửa được danh sách điểm và dùng bảng nhập điểm theo lớp.
 
 ## 📂 Cấu trúc thư mục
 
@@ -291,6 +339,12 @@ Mở trình duyệt tại `http://localhost:8000`.
 | Teacher | `hong.anh@academie.edu.vn` | Phạm Thị Hồng  |
 
 Seeder cũng tạo sẵn 3 lớp học, 5 môn học, 12 học sinh, điểm của 2 học kỳ, thời khóa biểu mẫu trong tuần, và một số nhận xét học sinh mẫu.
+
+## 🩹 Khắc phục lỗi thường gặp
+
+- **Lỗi kết nối MySQL / "Access denied for user 'root'"** — Kiểm tra MySQL trong XAMPP Control Panel đã bấm Start chưa. Nếu không start được, có thể port 3306 đang bị một MySQL khác chiếm dụng (ví dụ MySQL cài sẵn dạng Windows service) — tắt service đó hoặc đổi `DB_PORT` trong `.env` cho khớp với MySQL đang chạy thật.
+- **`composer install` báo lỗi thiếu extension `zip`** — Mở file `php.ini` mà CLI PHP đang dùng (chạy `php --ini` để biết file nào), bật/thêm dòng `extension=zip`, rồi khởi động lại terminal.
+- **Trang chạy được nhưng mất hết CSS/style sau khi `php artisan serve`** — Do chưa chạy Vite dev server hoặc chưa build assets production. Chạy `npm run build` (hoặc `composer run dev` khi đang phát triển) để tạo thư mục `public/build`.
 
 ## 👤 Tác giả
 
