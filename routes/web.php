@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\AdminLessonController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GradeController;
+use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -29,10 +32,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('grades', GradeController::class)->except(['create', 'edit', 'show']);
+    Route::get('/grades/entry', [GradeController::class, 'entry'])->name('grades.entry');
+    Route::post('/grades/entry', [GradeController::class, 'bulkStore'])->name('grades.entry.store');
 
     Route::middleware('role:teacher')->group(function () {
-        Route::view('/schedule', 'teaching.schedule')->name('schedule');
-        Route::view('/comments', 'teaching.comments')->name('comments');
+        Route::get('/schedule', [LessonController::class, 'index'])->name('schedule');
+
+        Route::get('/comments', [CommentController::class, 'index'])->name('comments');
+        Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     });
 
     Route::middleware('role:admin')->group(function () {
@@ -40,6 +47,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('students', StudentController::class)->except(['create', 'edit', 'show']);
         Route::resource('subjects', SubjectController::class)->except(['create', 'edit', 'show']);
         Route::resource('users', UserController::class)->except('show');
+
+        Route::get('/admin/schedule', [AdminLessonController::class, 'index'])->name('admin.schedule');
+        Route::post('/admin/schedule', [AdminLessonController::class, 'store'])->name('admin.schedule.store');
+        Route::put('/admin/schedule/{lesson}', [AdminLessonController::class, 'update'])->name('admin.schedule.update');
+        Route::delete('/admin/schedule/{lesson}', [AdminLessonController::class, 'destroy'])->name('admin.schedule.destroy');
     });
 });
 

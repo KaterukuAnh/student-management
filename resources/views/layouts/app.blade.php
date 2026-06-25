@@ -28,11 +28,12 @@
                     <a href="{{ route('classrooms.index') }}" class="nav-i {{ request()->routeIs('classrooms.*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Lớp học') }}</a>
                     <a href="{{ route('subjects.index') }}" class="nav-i {{ request()->routeIs('subjects.*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Môn học') }}</a>
                     <a href="{{ route('grades.index') }}" class="nav-i {{ request()->routeIs('grades.*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Điểm số') }}</a>
+                    <a href="{{ route('admin.schedule') }}" class="nav-i {{ request()->routeIs('admin.schedule*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Thời khóa biểu') }}</a>
                     <a href="{{ route('users.index') }}" class="nav-i {{ request()->routeIs('users.*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Quản lý tài khoản') }}</a>
                 @else
                     <div class="nav-sec">{{ __('Giảng dạy') }}</div>
                     <a href="{{ route('dashboard') }}" class="nav-i {{ request()->routeIs('dashboard') ? 'on' : '' }}"><span class="dot"></span>{{ __('Tổng quan') }}</a>
-                    <a href="{{ route('grades.index') }}" class="nav-i {{ request()->routeIs('grades.*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Nhập điểm') }}</a>
+                    <a href="{{ route('grades.entry') }}" class="nav-i {{ request()->routeIs('grades.*') ? 'on' : '' }}"><span class="dot"></span>{{ __('Nhập điểm') }}</a>
                     <a href="{{ route('schedule') }}" class="nav-i {{ request()->routeIs('schedule') ? 'on' : '' }}"><span class="dot"></span>{{ __('Thời khóa biểu') }}</a>
                     <a href="{{ route('comments') }}" class="nav-i {{ request()->routeIs('comments') ? 'on' : '' }}"><span class="dot"></span>{{ __('Nhận xét') }}</a>
                 @endif

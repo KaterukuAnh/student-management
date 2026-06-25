@@ -149,21 +149,66 @@
     @else
         <x-page-head crumb="{{ __('Tổng quan') }}" title="{{ __('Xin chào').', '.auth()->user()->name }}" sub="{{ __('Đây là khu vực giảng dạy của bạn.') }}" />
 
-        <div class="cards-grid">
-            <div class="panel" style="padding:22px">
-                <div class="ti" style="font-size:15.5px;font-weight:700;margin-bottom:8px">{{ __('Nhập điểm') }}</div>
-                <div style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px">{{ __('Ghi nhận điểm số cho học sinh theo môn học.') }}</div>
-                <a href="{{ route('grades.index') }}" class="btn btn-accent btn-sm">{{ __('Đi tới Nhập điểm') }}</a>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat">
+                <div class="lab">{{ __('Bộ môn đang dạy') }}</div>
+                <div class="val">{{ $teacherStats['subjects'] }}</div>
+                <div class="nt">{{ $teacherStats['classCount'] }} {{ __('lớp') }}</div>
             </div>
-            <div class="panel" style="padding:22px">
-                <div class="ti" style="font-size:15.5px;font-weight:700;margin-bottom:8px">{{ __('Thời khóa biểu') }}</div>
-                <div style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px">{{ __('Xem lịch dạy của bạn trong tuần.') }}</div>
-                <a href="{{ route('schedule') }}" class="btn btn-ghost btn-sm">{{ __('Xem lịch dạy') }}</a>
+            <div class="stat">
+                <div class="lab">{{ __('Lớp đang phụ trách') }}</div>
+                <div class="val">{{ $teacherStats['classCount'] }}</div>
+                <div class="nt">{{ __('đang giảng dạy') }}</div>
             </div>
-            <div class="panel" style="padding:22px">
-                <div class="ti" style="font-size:15.5px;font-weight:700;margin-bottom:8px">{{ __('Nhận xét học sinh') }}</div>
-                <div style="color:var(--ink-soft);font-size:13.5px;margin-bottom:16px">{{ __('Viết nhận xét về quá trình học tập và rèn luyện.') }}</div>
-                <a href="{{ route('comments') }}" class="btn btn-ghost btn-sm">{{ __('Viết nhận xét') }}</a>
+            <div class="stat">
+                <div class="lab">{{ __('Tiết dạy hôm nay') }}</div>
+                <div class="val">{{ $teacherStats['todayCount'] }}</div>
+                <div class="nt">{{ __('tiết') }}</div>
+            </div>
+        </div>
+
+        <div class="grid-2 mt-[18px]">
+            <div class="panel">
+                <div class="panel-h">
+                    <span class="ti">{{ __('Lịch dạy hôm nay') }}</span>
+                    <span class="ct">{{ $todayDayName }} · {{ now()->format('d/m') }}</span>
+                </div>
+                <div>
+                    @forelse ($todayLessons as $i => $lesson)
+                        <div class="flex items-center gap-[16px]" style="padding:14px 22px;{{ $i < $todayLessons->count() - 1 ? 'border-bottom:1px solid var(--line)' : '' }}">
+                            <div style="text-align:center;min-width:54px">
+                                <div style="font-size:11px;color:var(--ink-faint)">{{ __('Tiết') }} {{ $lesson->period }}</div>
+                                <div style="font-size:14px;font-weight:700;font-family:Spectral,serif">{{ \App\Models\Lesson::PERIOD_TIMES[$lesson->period] }}</div>
+                            </div>
+                            <div style="width:1px;align-self:stretch;background:var(--line)"></div>
+                            <div style="flex:1">
+                                <div style="font-weight:700">{{ $lesson->subject->name }}</div>
+                                <div style="font-size:13px;color:var(--ink-soft)">{{ __('Lớp') }} {{ $lesson->classroom->name }}</div>
+                            </div>
+                            <a href="{{ route('grades.entry', ['classroom_id' => $lesson->classroom_id, 'subject_id' => $lesson->subject_id]) }}" class="btn btn-ghost btn-sm">{{ __('Vào nhập điểm') }}</a>
+                        </div>
+                    @empty
+                        <div class="empty"><div class="big">{{ __('Không có tiết dạy nào hôm nay') }}</div></div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-h"><span class="ti">{{ __('Lớp đang phụ trách') }}</span></div>
+                <div style="padding:10px 0">
+                    @forelse ($myClasses as $i => $row)
+                        <div class="flex items-center gap-[13px]" style="padding:13px 22px;{{ $i < $myClasses->count() - 1 ? 'border-bottom:1px solid var(--line)' : '' }}">
+                            <span style="width:40px;height:40px;border-radius:11px;background:var(--accent-soft);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:Spectral,serif;font-size:14px">{{ $row['classroom']->name }}</span>
+                            <div style="flex:1">
+                                <div style="font-weight:600;font-size:14px">{{ $row['classroom']->name }}</div>
+                                <div style="font-size:12.5px;color:var(--ink-faint)">{{ $row['subjects'] }}</div>
+                            </div>
+                            <a href="{{ route('grades.entry', ['classroom_id' => $row['classroom']->id]) }}" class="btn btn-ghost btn-sm">{{ __('Vào nhập điểm') }}</a>
+                        </div>
+                    @empty
+                        <div class="empty"><div class="big">{{ __('Chưa có lớp nào trong thời khóa biểu') }}</div></div>
+                    @endforelse
+                </div>
             </div>
         </div>
     @endif

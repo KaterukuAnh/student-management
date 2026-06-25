@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Student extends Model
 {
     protected $fillable = [
-        'name', 'birth_date', 'gender', 'email', 'classroom_id'
+        'name', 'birth_date', 'gender', 'email', 'classroom_id',
     ];
 
     public const GENDERS = [
@@ -43,6 +43,12 @@ class Student extends Model
     public function grades()
     {
         return $this->hasMany(Grade::class);
+    }
+
+    // Quan hệ: 1 học sinh có nhiều nhận xét
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
     public function genderLabel(): string

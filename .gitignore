@@ -1,4 +1,6 @@
 *.log
+*_cookies.txt
+*_headers.txt
 .DS_Store
 .env
 .env.backup

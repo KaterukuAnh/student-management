@@ -10,7 +10,7 @@
 @section('content')
     <div
         x-data="{ showCreate: {{ $reopenCreate ? 'true' : 'false' }}, editing: null }"
-        x-init="@if ($reopenEdit) editing = @js(['id' => old('id'), 'name' => old('name'), 'grade' => old('grade')]) @endif"
+        x-init="@if ($reopenEdit) editing = @js(['id' => old('id'), 'name' => old('name'), 'grade' => old('grade'), 'room' => old('room'), 'homeroom_teacher_id' => old('homeroom_teacher_id')]) @endif"
     >
         <x-page-head crumb="{{ __('Tổ chức').' · '.__('Lớp học') }}" title="{{ __('Danh sách lớp học') }}">
             <x-slot:actions>
@@ -18,37 +18,51 @@
             </x-slot:actions>
         </x-page-head>
 
-        <div class="panel">
-            <table class="tbl">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>{{ __('Tên lớp') }}</th>
-                        <th>{{ __('Khối') }}</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($classrooms as $classroom)
-                        <tr>
-                            <td class="id">{{ $classroom->id }}</td>
-                            <td class="cell-name"><span class="nm">{{ $classroom->name }}</span></td>
-                            <td><span class="badge badge-soft">{{ __('Khối') }} {{ $classroom->grade }}</span></td>
-                            <td class="rowact">
-                                <button type="button" class="iconbtn" @click="editing = @js(['id' => $classroom->id, 'name' => $classroom->name, 'grade' => $classroom->grade])">{{ __('Sửa') }}</button>
-                                <form action="{{ route('classrooms.destroy', $classroom->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('{{ __('Xóa lớp này?') }}')" class="iconbtn danger">{{ __('Xóa') }}</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="4"><div class="empty"><div class="big">{{ __('Chưa có lớp học nào') }}</div></div></td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="cards-grid">
+            @forelse ($classrooms as $classroom)
+                <div class="panel" style="padding:22px">
+                    <div class="flex items-center justify-between">
+                        <div style="font-family:Spectral,serif;font-size:30px;font-weight:600">{{ $classroom->name }}</div>
+                        <div class="flex items-center gap-[6px]">
+                            <span class="badge badge-soft">{{ __('Khối') }} {{ $classroom->grade }}</span>
+                            <button type="button" class="iconbtn" @click="editing = @js(['id' => $classroom->id, 'name' => $classroom->name, 'grade' => $classroom->grade, 'room' => $classroom->room, 'homeroom_teacher_id' => $classroom->homeroom_teacher_id])">{{ __('Sửa') }}</button>
+                            <form action="{{ route('classrooms.destroy', $classroom->id) }}" method="POST" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" onclick="return confirm('{{ __('Xóa lớp này?') }}')" class="iconbtn danger">{{ __('Xóa') }}</button>
+                            </form>
+                        </div>
+                    </div>
 
+                    <div class="flex gap-[22px]" style="margin:18px 0;padding-bottom:18px;border-bottom:1px solid var(--line)">
+                        <div>
+                            <div style="font-size:12px;color:var(--ink-faint)">{{ __('Sĩ số') }}</div>
+                            <div style="font-size:18px;font-weight:700;margin-top:3px">{{ $classroom->students_count }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;color:var(--ink-faint)">{{ __('Phòng học') }}</div>
+                            <div style="font-size:18px;font-weight:700;margin-top:3px">{{ $classroom->room ?? '—' }}</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size:12px;color:var(--ink-faint);margin-bottom:8px">{{ __('GV chủ nhiệm') }}</div>
+                    <div class="flex items-center gap-[11px]">
+                        @if ($classroom->homeroomTeacher)
+                            <x-avatar :name="$classroom->homeroomTeacher->name" :size="34" />
+                            <div style="font-size:14px;font-weight:600">{{ $classroom->homeroomTeacher->name }}</div>
+                        @else
+                            <span style="color:var(--ink-faint)">—</span>
+                        @endif
+                    </div>
+
+                    <a href="{{ route('students.index', ['classroom_id' => $classroom->id]) }}" class="btn btn-ghost btn-sm" style="margin-top:18px;width:100%;justify-content:center">{{ __('Xem danh sách') }}</a>
+                </div>
+            @empty
+                <div class="empty"><div class="big">{{ __('Chưa có lớp học nào') }}</div></div>
+            @endforelse
+        </div>
+
+        <div class="panel mt-[18px]">
             <x-pagination :paginator="$classrooms" />
         </div>
 
@@ -78,13 +92,28 @@
                                 <input type="text" name="name" value="{{ old('name') }}" class="inp">
                             </div>
 
-                            <div class="field full">
+                            <div class="field">
                                 <label>{{ __('Khối') }}</label>
                                 <select name="grade">
                                     <option value="">-- {{ __('Chọn khối') }} --</option>
                                     <option value="10" {{ old('grade') == '10' ? 'selected' : '' }}>{{ __('Khối') }} 10</option>
                                     <option value="11" {{ old('grade') == '11' ? 'selected' : '' }}>{{ __('Khối') }} 11</option>
                                     <option value="12" {{ old('grade') == '12' ? 'selected' : '' }}>{{ __('Khối') }} 12</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label>{{ __('Phòng học') }}</label>
+                                <input type="text" name="room" value="{{ old('room') }}" class="inp">
+                            </div>
+
+                            <div class="field full">
+                                <label>{{ __('GV chủ nhiệm') }}</label>
+                                <select name="homeroom_teacher_id">
+                                    <option value="">-- {{ __('Không có') }} --</option>
+                                    @foreach ($teachers as $teacher)
+                                        <option value="{{ $teacher->id }}" {{ old('homeroom_teacher_id') == $teacher->id ? 'selected' : '' }}>{{ $teacher->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -127,12 +156,27 @@
                                     <input type="text" name="name" x-model="editing.name" class="inp">
                                 </div>
 
-                                <div class="field full">
+                                <div class="field">
                                     <label>{{ __('Khối') }}</label>
                                     <select name="grade" x-model="editing.grade">
                                         <option value="10">{{ __('Khối') }} 10</option>
                                         <option value="11">{{ __('Khối') }} 11</option>
                                         <option value="12">{{ __('Khối') }} 12</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label>{{ __('Phòng học') }}</label>
+                                    <input type="text" name="room" x-model="editing.room" class="inp">
+                                </div>
+
+                                <div class="field full">
+                                    <label>{{ __('GV chủ nhiệm') }}</label>
+                                    <select name="homeroom_teacher_id" x-model="editing.homeroom_teacher_id">
+                                        <option value="">-- {{ __('Không có') }} --</option>
+                                        @foreach ($teachers as $teacher)
+                                            <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
