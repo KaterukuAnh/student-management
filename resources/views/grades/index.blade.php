@@ -10,7 +10,7 @@
 @section('content')
     <div
         x-data="{ showCreate: {{ $reopenCreate ? 'true' : 'false' }}, editing: null }"
-        x-init="@if ($reopenEdit) editing = @js(['id' => old('id'), 'student_id' => old('student_id'), 'subject_id' => old('subject_id'), 'score' => old('score'), 'semester' => old('semester')]) @endif"
+        x-init="@if ($reopenEdit) editing = @js(['id' => old('id'), 'student_id' => old('student_id'), 'subject_id' => old('subject_id'), 'oral_score' => old('oral_score'), 'quiz15_score' => old('quiz15_score'), 'test45_score' => old('test45_score'), 'final_score' => old('final_score'), 'semester' => old('semester')]) @endif"
     >
         <x-page-head crumb="{{ __('Giảng dạy').' · '.__('Điểm số') }}" title="{{ __('Danh sách điểm') }}">
             <x-slot:actions>
@@ -37,13 +37,17 @@
                             <td class="cell-name"><span class="nm">{{ $grade->student->name }}</span></td>
                             <td>{{ $grade->subject->name }}</td>
                             <td>
-                                <span class="badge {{ $grade->score >= 8 ? 'badge-good' : ($grade->score >= 5 ? 'badge-fair' : 'badge-avg') }}">
-                                    {{ $grade->score }}
-                                </span>
+                                @if ($grade->score !== null)
+                                    <span class="badge {{ $grade->score >= 8 ? 'badge-good' : ($grade->score >= 5 ? 'badge-fair' : 'badge-avg') }}">
+                                        {{ number_format($grade->score, 1) }}
+                                    </span>
+                                @else
+                                    <span class="badge badge-soft">—</span>
+                                @endif
                             </td>
                             <td>{{ $grade->semester }}</td>
                             <td class="rowact">
-                                <button type="button" class="iconbtn" @click="editing = @js(['id' => $grade->id, 'student_id' => $grade->student_id, 'subject_id' => $grade->subject_id, 'score' => $grade->score, 'semester' => $grade->semester])">{{ __('Sửa') }}</button>
+                                <button type="button" class="iconbtn" @click="editing = @js(['id' => $grade->id, 'student_id' => $grade->student_id, 'subject_id' => $grade->subject_id, 'oral_score' => $grade->oral_score, 'quiz15_score' => $grade->quiz15_score, 'test45_score' => $grade->test45_score, 'final_score' => $grade->final_score, 'semester' => $grade->semester])">{{ __('Sửa') }}</button>
                                 <form action="{{ route('grades.destroy', $grade->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('DELETE')
@@ -106,11 +110,6 @@
                             </div>
 
                             <div class="field">
-                                <label>{{ __('Điểm') }} (0-10)</label>
-                                <input type="number" name="score" step="0.1" min="0" max="10" value="{{ old('score') }}" class="inp">
-                            </div>
-
-                            <div class="field">
                                 <label>{{ __('Học kỳ') }}</label>
                                 <select name="semester">
                                     <option value="">-- {{ __('Chọn học kỳ') }} --</option>
@@ -119,6 +118,26 @@
                                     <option value="HK1-2026" {{ old('semester') == 'HK1-2026' ? 'selected' : '' }}>HK1 - 2026</option>
                                     <option value="HK2-2026" {{ old('semester') == 'HK2-2026' ? 'selected' : '' }}>HK2 - 2026</option>
                                 </select>
+                            </div>
+
+                            <div class="field">
+                                <label>{{ __('Miệng') }} (0-10)</label>
+                                <input type="number" name="oral_score" step="0.1" min="0" max="10" value="{{ old('oral_score') }}" class="inp">
+                            </div>
+
+                            <div class="field">
+                                <label>{{ __('15 phút') }} (0-10)</label>
+                                <input type="number" name="quiz15_score" step="0.1" min="0" max="10" value="{{ old('quiz15_score') }}" class="inp">
+                            </div>
+
+                            <div class="field">
+                                <label>{{ __('45 phút') }} (0-10)</label>
+                                <input type="number" name="test45_score" step="0.1" min="0" max="10" value="{{ old('test45_score') }}" class="inp">
+                            </div>
+
+                            <div class="field">
+                                <label>{{ __('Cuối kỳ') }} (0-10)</label>
+                                <input type="number" name="final_score" step="0.1" min="0" max="10" value="{{ old('final_score') }}" class="inp">
                             </div>
                         </div>
                     </div>
@@ -174,11 +193,6 @@
                                 </div>
 
                                 <div class="field">
-                                    <label>{{ __('Điểm') }} (0-10)</label>
-                                    <input type="number" name="score" step="0.1" min="0" max="10" x-model="editing.score" class="inp">
-                                </div>
-
-                                <div class="field">
                                     <label>{{ __('Học kỳ') }}</label>
                                     <select name="semester" x-model="editing.semester">
                                         <option value="HK1-2025">HK1 - 2025</option>
@@ -186,6 +200,26 @@
                                         <option value="HK1-2026">HK1 - 2026</option>
                                         <option value="HK2-2026">HK2 - 2026</option>
                                     </select>
+                                </div>
+
+                                <div class="field">
+                                    <label>{{ __('Miệng') }} (0-10)</label>
+                                    <input type="number" name="oral_score" step="0.1" min="0" max="10" x-model="editing.oral_score" class="inp">
+                                </div>
+
+                                <div class="field">
+                                    <label>{{ __('15 phút') }} (0-10)</label>
+                                    <input type="number" name="quiz15_score" step="0.1" min="0" max="10" x-model="editing.quiz15_score" class="inp">
+                                </div>
+
+                                <div class="field">
+                                    <label>{{ __('45 phút') }} (0-10)</label>
+                                    <input type="number" name="test45_score" step="0.1" min="0" max="10" x-model="editing.test45_score" class="inp">
+                                </div>
+
+                                <div class="field">
+                                    <label>{{ __('Cuối kỳ') }} (0-10)</label>
+                                    <input type="number" name="final_score" step="0.1" min="0" max="10" x-model="editing.final_score" class="inp">
                                 </div>
                             </div>
                         </div>
