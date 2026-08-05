@@ -6,6 +6,7 @@ A school student management system built with Laravel, featuring Admin/Teacher r
 
 - **Backend:** PHP, Laravel
 - **Database:** MySQL
+- **API auth:** Laravel Sanctum (Bearer tokens) + `kreait/firebase-php` (Firebase ID Token verification)
 - **Frontend:** Blade templates, Tailwind CSS (via `@tailwindcss/vite`), Alpine.js, Chart.js
 - **Build tool:** Vite + `laravel-vite-plugin`
 - **Code quality:** Laravel Pint, PHPUnit
@@ -53,6 +54,13 @@ A school student management system built with Laravel, featuring Admin/Teacher r
 - Vietnamese strings are the literal translation keys in the code; `lang/en.json` and `lang/ja.json` provide the English/Japanese overrides
 - Language switch via `/lang/{locale}`, persisted in session, applied on every request by the `SetLocale` middleware
 
+### Mobile API (Student, React Native)
+
+- Third role: `student` (on `users.role`), linked to a `students` record via `users.student_id`
+- Login via Firebase Authentication (Google as the sign-in provider) — the mobile app signs in with the Firebase Auth SDK and sends the resulting Firebase ID Token to `POST /api/auth/firebase`; the backend verifies it server-side (`kreait/firebase-php`, no OAuth redirect flow), creates/finds the user, auto-links it to a `Student` by matching email on first login, and returns a Sanctum Bearer token
+- All data endpoints (`/api/me`, `/api/grades`, `/api/schedule`, `/api/comments`) are scoped to the authenticated token's own `student_id` only — there is no student ID route parameter, so one student can never request another's data
+- JSON responses only (no Blade views on the `/api/*` routes)
+
 ## 🧭 Route Summary
 
 | Method | Route | Description | Access |
@@ -71,8 +79,14 @@ A school student management system built with Laravel, featuring Admin/Teacher r
 | GET, POST, PUT, DELETE | `/users`, `/users/{user}` | User account management | Admin |
 | GET, POST, PUT, DELETE | `/admin/schedule`, `/admin/schedule/{lesson}` | School-wide lesson scheduling | Admin |
 | GET | `/lang/{locale}` | Switch UI language (vi/en/ja) | Both |
+| POST | `/api/auth/firebase` | Mobile login: verify Firebase ID Token (Google sign-in), issue Sanctum token | Public |
+| GET | `/api/me` | Authenticated student's profile + linked classroom | Student (API) |
+| GET | `/api/grades` | Own grades only | Student (API) |
+| GET | `/api/schedule` | Own classroom's weekly schedule | Student (API) |
+| GET | `/api/comments` | Own comment history | Student (API) |
 
 > `/grades` and `/grades/entry` carry no `role:` middleware — both Admin and Teacher can list/edit grades and use the class-wide entry sheet.
+> `/api/me`, `/api/grades`, `/api/schedule`, `/api/comments` require `auth:sanctum` + `role:student` and a `Authorization: Bearer <token>` header.
 
 ## 📂 Project Structure
 
@@ -84,12 +98,13 @@ student-management/
 │       ├── Controllers/              # Dashboard, Classroom, Student, Subject, Grade,
 │       │                             # Lesson (teacher view), AdminLesson (admin scheduling),
 │       │                             # Comment, User, Profile, Auth/*
-│       └── Middleware/               # EnsureRole (role:admin|teacher), SetLocale
+│       │   └── Api/                  # AuthController (Firebase login), Me, Grade, Schedule, Comment
+│       └── Middleware/               # EnsureRole (role:admin|teacher|student), SetLocale
 ├── database/
 │   ├── migrations/                   # users, classrooms, students, subjects, grades,
-│   │                                 # lessons, comments + incremental schema changes
+│   │                                 # lessons, comments, personal_access_tokens + schema changes
 │   ├── seeders/DatabaseSeeder.php    # Demo accounts + sample classrooms/students/grades/lessons
-│   └── factories/UserFactory.php     # User factory (admin/teacher states)
+│   └── factories/UserFactory.php     # User factory (admin/teacher/student states)
 ├── resources/
 │   ├── views/
 │   │   ├── layouts/app.blade.php     # Main layout: sidebar, topbar, admin/teacher theming
@@ -104,7 +119,9 @@ student-management/
 │   │   └── components/               # x-page-head, x-avatar, x-pagination, x-lang-switcher...
 │   └── css/app.css                   # Design system (Tailwind v4 + custom .panel/.tbl/.btn/.sched...)
 ├── lang/{en,ja}.json                 # English/Japanese translation overrides
-├── routes/web.php                    # All application routes
+├── routes/
+│   ├── web.php                       # Admin/Teacher Blade routes
+│   └── api.php                       # Mobile JSON API (Sanctum-authenticated)
 ├── composer.json                     # PHP dependencies + composer scripts (setup, dev, test)
 └── package.json                      # Frontend dependencies + Vite scripts (build, dev)
 ```
@@ -123,6 +140,7 @@ cp .env.example .env
 php artisan key:generate
 # Edit .env: set DB_CONNECTION=mysql and DB_DATABASE=student_management
 # (create the `student_management` database in MySQL beforehand)
+# For the mobile API, also set FIREBASE_PROJECT_ID (and optionally FIREBASE_CREDENTIALS)
 
 # JS dependencies
 npm install
@@ -148,6 +166,13 @@ composer run dev
 ```
 
 Open your browser at `http://localhost:8000`.
+
+## 📱 Mobile API / Firebase Setup
+
+- The mobile app (React Native) talks to this backend via `routes/api.php`, authenticated with Laravel Sanctum Bearer tokens.
+- Download a Service Account JSON from the Firebase Console and place it under `storage/firebase/` (already listed in `.gitignore` — never commit it).
+- Add to `.env`: `FIREBASE_PROJECT_ID` and `FIREBASE_CREDENTIALS` (path to the service account JSON).
+- React Native app repo: https://github.com/KaterukuAnh/academie-app
 
 ## 👤 Demo Accounts
 
@@ -183,6 +208,7 @@ Hệ thống quản lý học sinh cho trường học, xây dựng bằng Larav
 
 - **Backend:** PHP, Laravel
 - **Cơ sở dữ liệu:** MySQL
+- **API auth:** Laravel Sanctum (Bearer token) + `kreait/firebase-php` (verify Firebase ID Token)
 - **Frontend:** Blade templates, Tailwind CSS (qua `@tailwindcss/vite`), Alpine.js, Chart.js
 - **Build tool:** Vite + `laravel-vite-plugin`
 - **Chất lượng code:** Laravel Pint, PHPUnit
@@ -230,6 +256,13 @@ Hệ thống quản lý học sinh cho trường học, xây dựng bằng Larav
 - Chuỗi tiếng Việt là key dịch gốc ngay trong code; `lang/en.json` và `lang/ja.json` cung cấp bản dịch tiếng Anh/Nhật
 - Chuyển ngôn ngữ qua `/lang/{locale}`, lưu vào session, áp dụng ở mỗi request bởi middleware `SetLocale`
 
+### API cho App di động (Học sinh, React Native)
+
+- Vai trò thứ 3: `student` (ở `users.role`), liên kết với bản ghi trong `students` qua `users.student_id`
+- Đăng nhập qua Firebase Authentication (Google là provider đăng nhập) — app di động đăng nhập bằng Firebase Auth SDK rồi gửi Firebase ID Token lên `POST /api/auth/firebase`; backend verify token ở server (`kreait/firebase-php`, không dùng OAuth redirect flow), tạo/tìm user, tự liên kết với `Student` qua email ở lần đăng nhập đầu, trả về Sanctum Bearer token
+- Tất cả endpoint dữ liệu (`/api/me`, `/api/grades`, `/api/schedule`, `/api/comments`) chỉ trả dữ liệu của đúng `student_id` gắn với token — không có tham số ID học sinh trên route nên không thể xem được dữ liệu học sinh khác
+- Chỉ trả JSON (không dùng Blade view trên các route `/api/*`)
+
 ## 🧭 Tổng hợp Route chính
 
 | Method | Route | Mô tả | Quyền truy cập |
@@ -248,8 +281,14 @@ Hệ thống quản lý học sinh cho trường học, xây dựng bằng Larav
 | GET, POST, PUT, DELETE | `/users`, `/users/{user}` | Quản lý tài khoản | Admin |
 | GET, POST, PUT, DELETE | `/admin/schedule`, `/admin/schedule/{lesson}` | Xếp thời khóa biểu toàn trường | Admin |
 | GET | `/lang/{locale}` | Chuyển ngôn ngữ giao diện (vi/en/ja) | Cả hai |
+| POST | `/api/auth/firebase` | Đăng nhập mobile: verify Firebase ID Token (đăng nhập Google), trả Sanctum token | Public |
+| GET | `/api/me` | Hồ sơ học sinh đang đăng nhập + lớp đang học | Student (API) |
+| GET | `/api/grades` | Chỉ điểm của chính học sinh đó | Student (API) |
+| GET | `/api/schedule` | Thời khóa biểu của lớp học sinh đó | Student (API) |
+| GET | `/api/comments` | Lịch sử nhận xét của chính học sinh đó | Student (API) |
 
 > `/grades` và `/grades/entry` không gắn middleware `role:` nào — cả Admin và Teacher đều xem/sửa được danh sách điểm và dùng bảng nhập điểm theo lớp.
+> `/api/me`, `/api/grades`, `/api/schedule`, `/api/comments` yêu cầu `auth:sanctum` + `role:student` và header `Authorization: Bearer <token>`.
 
 ## 📂 Cấu trúc thư mục
 
@@ -261,12 +300,13 @@ student-management/
 │       ├── Controllers/              # Dashboard, Classroom, Student, Subject, Grade,
 │       │                             # Lesson (xem lịch của Teacher), AdminLesson (Admin xếp lịch),
 │       │                             # Comment, User, Profile, Auth/*
-│       └── Middleware/               # EnsureRole (role:admin|teacher), SetLocale
+│       │   └── Api/                  # AuthController (đăng nhập Firebase), Me, Grade, Schedule, Comment
+│       └── Middleware/               # EnsureRole (role:admin|teacher|student), SetLocale
 ├── database/
 │   ├── migrations/                   # users, classrooms, students, subjects, grades,
-│   │                                 # lessons, comments + các thay đổi schema tiếp theo
+│   │                                 # lessons, comments, personal_access_tokens + các thay đổi schema
 │   ├── seeders/DatabaseSeeder.php    # Tài khoản demo + dữ liệu mẫu (lớp/học sinh/điểm/lịch dạy)
-│   └── factories/UserFactory.php     # Factory tạo User (state admin/teacher)
+│   └── factories/UserFactory.php     # Factory tạo User (state admin/teacher/student)
 ├── resources/
 │   ├── views/
 │   │   ├── layouts/app.blade.php     # Layout chính: sidebar, topbar, theme admin/teacher
@@ -281,7 +321,9 @@ student-management/
 │   │   └── components/               # x-page-head, x-avatar, x-pagination, x-lang-switcher...
 │   └── css/app.css                   # Design system (Tailwind v4 + class riêng .panel/.tbl/.btn/.sched...)
 ├── lang/{en,ja}.json                 # Bản dịch tiếng Anh/Nhật
-├── routes/web.php                    # Toàn bộ route của ứng dụng
+├── routes/
+│   ├── web.php                       # Route Blade cho Admin/Teacher
+│   └── api.php                       # API JSON cho mobile (xác thực qua Sanctum)
 ├── composer.json                     # Dependencies PHP + composer scripts (setup, dev, test)
 └── package.json                      # Dependencies frontend + Vite scripts (build, dev)
 ```
@@ -300,6 +342,7 @@ cp .env.example .env
 php artisan key:generate
 # Sửa .env: đặt DB_CONNECTION=mysql và DB_DATABASE=student_management
 # (tạo database `student_management` trong MySQL trước khi migrate)
+# Cho API mobile, đặt thêm FIREBASE_PROJECT_ID (và FIREBASE_CREDENTIALS nếu cần)
 
 # Cài dependencies JS
 npm install
@@ -325,6 +368,13 @@ composer run dev
 ```
 
 Mở trình duyệt tại `http://localhost:8000`.
+
+## 📱 Mobile API / Thiết lập Firebase
+
+- App di động (React Native) giao tiếp với backend qua `routes/api.php`, xác thực bằng Sanctum Bearer token.
+- Tải file Service Account JSON từ Firebase Console, đặt tại `storage/firebase/` (đã có trong `.gitignore`, không commit lên Git).
+- Thêm vào `.env`: `FIREBASE_PROJECT_ID` và `FIREBASE_CREDENTIALS` (đường dẫn tới file service account JSON).
+- Repo app React Native: https://github.com/KaterukuAnh/academie-app
 
 ## 👤 Tài khoản demo
 

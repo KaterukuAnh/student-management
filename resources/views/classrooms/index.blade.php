@@ -18,6 +18,21 @@
             </x-slot:actions>
         </x-page-head>
 
+        <div class="panel" style="margin-bottom:16px">
+            <div class="panel-h" style="padding:14px 22px">
+                <form method="GET" action="{{ route('classrooms.index') }}" x-data x-ref="searchForm" style="display:flex;align-items:center;gap:10px;width:100%">
+                    <div class="field" style="margin:0;flex:1;max-width:340px">
+                        <input type="text" name="search" value="{{ $search }}" class="inp"
+                               placeholder="{{ __('Tìm theo tên lớp…') }}"
+                               @input.debounce.350ms="$refs.searchForm.submit()">
+                    </div>
+                    @if($search)
+                        <a href="{{ route('classrooms.index') }}" class="iconbtn">✕ {{ __('Xóa lọc') }}</a>
+                    @endif
+                </form>
+            </div>
+        </div>
+
         <div class="cards-grid">
             @forelse ($classrooms as $classroom)
                 <div class="panel" style="padding:22px">
@@ -58,7 +73,7 @@
                     <a href="{{ route('students.index', ['classroom_id' => $classroom->id]) }}" class="btn btn-ghost btn-sm" style="margin-top:18px;width:100%;justify-content:center">{{ __('Xem danh sách') }}</a>
                 </div>
             @empty
-                <div class="empty"><div class="big">{{ __('Chưa có lớp học nào') }}</div></div>
+                <div class="empty" style="padding:60px 20px"><div class="big">{{ $search ? __('Không tìm thấy kết quả phù hợp') : __('Chưa có lớp học nào') }}</div></div>
             @endforelse
         </div>
 

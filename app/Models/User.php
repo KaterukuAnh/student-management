@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +24,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'firebase_uid',
+        'student_id',
     ];
 
     public function isAdmin(): bool
@@ -35,6 +38,11 @@ class User extends Authenticatable
         return $this->role === 'teacher';
     }
 
+    public function isStudent(): bool
+    {
+        return $this->role === 'student';
+    }
+
     public function lessons()
     {
         return $this->hasMany(Lesson::class, 'teacher_id');
@@ -43,6 +51,12 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class, 'teacher_id');
+    }
+
+    // Quan hệ: 1 tài khoản học sinh liên kết với 1 bản ghi Student
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
     }
 
     /**

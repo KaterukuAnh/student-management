@@ -13,8 +13,20 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = max(1, min((int) $request->input('per_page', 10), 100));
-        $users = User::latest()->paginate($perPage)->withQueryString();
-        return view('users.index', compact('users'));
+        $search = $request->input('search', '');
+
+        $query = User::latest();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->paginate($perPage)->withQueryString();
+
+        return view('users.index', compact('users', 'search'));
     }
 
     // Form tạo mới
