@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'firebase' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        // Path to Firebase service account JSON — stored as a path relative to project root in .env,
+        // resolved here to an absolute path so file_exists() works regardless of PHP working directory.
+        'credentials' => env('FIREBASE_CREDENTIALS') ? base_path(env('FIREBASE_CREDENTIALS')) : null,
+    ],
+
 ];

@@ -19,6 +19,21 @@
         </x-page-head>
 
         <div class="panel">
+            <div class="panel-h" style="padding:14px 22px">
+                <form method="GET" action="{{ route('students.index') }}" x-data x-ref="searchForm" style="display:flex;align-items:center;gap:10px;width:100%">
+                    <div class="field" style="margin:0;flex:1;max-width:340px">
+                        <input type="text" name="search" value="{{ $search }}" class="inp"
+                               placeholder="{{ __('Tìm theo tên hoặc email…') }}"
+                               @input.debounce.350ms="$refs.searchForm.submit()">
+                    </div>
+                    @if(request('classroom_id'))
+                        <input type="hidden" name="classroom_id" value="{{ request('classroom_id') }}">
+                    @endif
+                    @if($search)
+                        <a href="{{ route('students.index', array_filter(['classroom_id' => request('classroom_id')])) }}" class="iconbtn">✕ {{ __('Xóa lọc') }}</a>
+                    @endif
+                </form>
+            </div>
             <table class="tbl">
                 <thead>
                     <tr>
@@ -53,7 +68,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7"><div class="empty"><div class="big">{{ __('Chưa có học sinh nào') }}</div></div></td></tr>
+                        <tr><td colspan="7"><div class="empty"><div class="big">{{ $search ? __('Không tìm thấy kết quả phù hợp') : __('Chưa có học sinh nào') }}</div></div></td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -51,6 +51,12 @@ class Student extends Model
         return $this->hasMany(Comment::class);
     }
 
+    // Quan hệ: 1 học sinh có thể liên kết với 1 tài khoản đăng nhập (app di động)
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
     public function genderLabel(): string
     {
         return __(self::GENDERS[$this->gender] ?? $this->gender);

@@ -103,6 +103,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Ngô Thị Thảo', 'birth_date' => '2007-10-08', 'gender' => 'female', 'email' => 'thao.12a3@student.edu.vn', 'classroom' => '12A3', 'hk1_avg' => 5.2, 'hk2_avg' => 5.5], // Khá
             ['name' => 'Dương Văn Hải', 'birth_date' => '2008-06-20', 'gender' => 'male', 'email' => 'hai.12a3@student.edu.vn', 'classroom' => '12A3', 'hk1_avg' => 4.3, 'hk2_avg' => 4.6], // Yếu
             ['name' => 'Lý Thị Mai', 'birth_date' => '2007-08-14', 'gender' => 'female', 'email' => 'mai.12a3@student.edu.vn', 'classroom' => '12A3', 'hk1_avg' => 4.2, 'hk2_avg' => 4.4], // Yếu
+
+            // Tài khoản test thật — liên kết Firebase qua email Google
+            ['name' => 'Đặng Minh Anh', 'birth_date' => '2009-05-11', 'gender' => 'female', 'email' => 'minhanhdang511@gmail.com', 'classroom' => '10A1', 'hk1_avg' => 7.8, 'hk2_avg' => 8.1], // Giỏi
         ];
 
         $students = [];
@@ -175,7 +178,6 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Nhận xét mẫu, ngày tạo lùi về trước để có lịch sử khi demo
         $defaultTeacher = User::where('email', 'teacher@academie.edu.vn')->first();
 
         $commentsData = [
@@ -183,6 +185,8 @@ class DatabaseSeeder extends Seeder
             [$students[0], 'good', 'Có tiến bộ rõ rệt, giữ vững phong độ học tập.', 5],
             [$students[4], 'fair', 'Cần cố gắng hơn trong việc hoàn thành bài tập về nhà.', 45],
             [$students[8], 'avg', 'Còn thiếu tập trung trong giờ học, cần nhắc nhở thêm.', 30],
+            [$students[12], 'good', 'Học sinh chăm chỉ, hoàn thành tốt bài tập về nhà.', 20],
+            [$students[12], 'good', 'Tích cực tham gia các hoạt động nhóm, có tinh thần hợp tác cao.', 7],
         ];
 
         foreach ($commentsData as [$student, $conduct, $content, $daysAgo]) {

@@ -13,10 +13,18 @@ class ClassroomController extends Controller
     public function index(Request $request)
     {
         $perPage = max(1, min((int) $request->input('per_page', 10), 100));
-        $classrooms = Classroom::withCount('students')->with('homeroomTeacher')->paginate($perPage)->withQueryString();
+        $search = $request->input('search', '');
+
+        $query = Classroom::withCount('students')->with('homeroomTeacher');
+
+        if ($search !== '') {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $classrooms = $query->paginate($perPage)->withQueryString();
         $teachers = User::where('role', 'teacher')->orderBy('name')->get();
 
-        return view('classrooms.index', compact('classrooms', 'teachers'));
+        return view('classrooms.index', compact('classrooms', 'teachers', 'search'));
     }
 
     private function homeroomTeacherRule(): array

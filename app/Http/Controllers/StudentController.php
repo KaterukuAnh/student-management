@@ -12,16 +12,24 @@ class StudentController extends Controller
     {
         $perPage = max(1, min((int) $request->input('per_page', 10), 100));
 
+        $search = $request->input('search', '');
         $query = Student::with('classroom');
 
         if ($request->filled('classroom_id')) {
             $query->where('classroom_id', $request->input('classroom_id'));
         }
 
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
         $students = $query->paginate($perPage)->withQueryString();
         $classrooms = Classroom::all();
 
-        return view('students.index', compact('students', 'classrooms'));
+        return view('students.index', compact('students', 'classrooms', 'search'));
     }
 
     public function store(Request $request)
